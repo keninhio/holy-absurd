@@ -16,7 +16,7 @@ There's also an optional "with illumination" checkbox that makes Claude generate
 
 It's a single HTML file with no backend and no API key. You just download it, drop it into a new claude.ai conversation, and ask Claude to "make this work as an artifact." Claude rebuilds it in the artifact pane and it runs on your own plan. Works on any tier that has artifacts.
 
-Repo: `[link here once you push to GitHub]`
+Repo: https://github.com/keninhio/holy-absurd
 
 A few vibes I've tried:
 
