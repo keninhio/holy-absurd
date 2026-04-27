@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Holy Absurd — A Saint Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IM+Fell+English+SC&display=swap');
+
+  :root {
+    --ink: #2a1810;
+    --ink-soft: #5b4a3a;
+    --ink-faint: #8a7763;
+    --parchment: #f4ead5;
+    --parchment-shadow: #e8dcc0;
+    --gilt: #b8860b;
+    --wine: #722f37;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse at top, #f8f0db 0%, #e8dcc0 100%);
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--ink);
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    font-family: 'IM Fell English SC', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    color: var(--wine);
+    text-align: center;
+    margin: 0 0 4px;
+    letter-spacing: 0.04em;
+  }
+
+  .subtitle {
+    font-style: italic;
+    font-size: 1.05rem;
+    opacity: 0.75;
+    margin-bottom: 32px;
+    text-align: center;
+    max-width: 540px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    max-width: 540px;
+    margin-bottom: 10px;
+  }
+
+  .options-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 540px;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+  }
+
+  .options-row label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .options-row input[type="checkbox"] {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--parchment);
+    border: 1.5px solid var(--gilt);
+    border-radius: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: border-color 0.15s;
+  }
+
+  .options-row input[type="checkbox"]:hover {
+    border-color: var(--wine);
+  }
+
+  .options-row input[type="checkbox"]:checked {
+    border-color: var(--wine);
+  }
+
+  .options-row input[type="checkbox"]:checked::after {
+    content: '✦';
+    color: var(--wine);
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  .options-row input[type="checkbox"]:focus-visible {
+    outline: 1.5px solid var(--wine);
+    outline-offset: 2px;
+  }
+
+  .options-row .hint {
+    font-style: italic;
+    opacity: 0.55;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 1.05rem;
+    border: 1.5px solid var(--ink);
+    background: var(--parchment);
+    color: var(--ink);
+    border-radius: 2px;
+    outline: none;
+  }
+
+  input[type="text"]:focus { border-color: var(--wine); }
+
+  button.primary {
+    padding: 12px 22px;
+    font-family: 'IM Fell English SC', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    border: 1.5px solid var(--ink);
+    background: var(--ink);
+    color: var(--parchment);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  button.primary:hover:not(:disabled) { background: var(--wine); border-color: var(--wine); }
+  button.primary:disabled { opacity: 0.5; cursor: wait; }
+
+  .card {
+    width: 100%;
+    max-width: 540px;
+    background: var(--parchment);
+    border: 2px solid var(--gilt);
+    padding: 36px 32px;
+    box-shadow:
+      0 0 0 1px var(--parchment-shadow),
+      0 18px 40px rgba(42, 24, 16, 0.18);
+    position: relative;
+    min-height: 280px;
+  }
+
+  .card::before {
+    content: '✦';
+    position: absolute;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    color: var(--gilt);
+    font-size: 0.9rem;
+  }
+
+  .saint-image {
+    width: 60%;
+    max-width: 220px;
+    margin: 18px auto 18px;
+    aspect-ratio: 240 / 320;
+    background: var(--parchment-shadow);
+    border: 1.5px solid var(--gilt);
+    padding: 6px;
+    display: block;
+    box-shadow: inset 0 0 0 1px var(--parchment);
+  }
+
+  .saint-image svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .saint-name {
+    font-family: 'IM Fell English SC', serif;
+    font-size: 1.7rem;
+    color: var(--wine);
+    text-align: center;
+    margin: 8px 0 6px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+
+  .domain {
+    text-align: center;
+    font-style: italic;
+    font-size: 1.02rem;
+    color: var(--ink-soft);
+    max-width: 90%;
+    margin: 0 auto 4px;
+    line-height: 1.45;
+  }
+
+  .divider {
+    text-align: center;
+    color: var(--gilt);
+    margin: 22px 0 18px;
+    letter-spacing: 0.5em;
+    font-size: 0.95rem;
+  }
+
+  .label {
+    font-family: 'IM Fell English SC', serif;
+    font-size: 0.78rem;
+    color: var(--wine);
+    letter-spacing: 0.14em;
+    margin-top: 18px;
+    margin-bottom: 5px;
+  }
+
+  .body-text {
+    font-size: 1.05rem;
+    line-height: 1.55;
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  .intercession {
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--ink);
+    border-left: 2px solid var(--gilt);
+    padding-left: 16px;
+    margin: 6px 0 0;
+  }
+
+  .feast {
+    text-align: center;
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid var(--parchment-shadow);
+    font-family: 'IM Fell English SC', serif;
+    font-size: 0.78rem;
+    color: var(--wine);
+    letter-spacing: 0.14em;
+  }
+
+  .feast-date {
+    margin-top: 4px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--ink);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .actions {
+    margin-top: 22px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    opacity: 0;
+    transition: opacity 0.5s ease 0.3s;
+  }
+
+  .actions.visible { opacity: 1; }
+
+  .actions button {
+    background: transparent;
+    border: none;
+    color: var(--ink-faint);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.98rem;
+    font-style: italic;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    padding: 6px 8px;
+    transition: color 0.2s;
+  }
+
+  .actions button:hover {
+    color: var(--wine);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .placeholder {
+    text-align: center;
+    font-style: italic;
+    opacity: 0.5;
+    margin-top: 80px;
+    font-size: 1.1rem;
+  }
+
+  .loading {
+    text-align: center;
+    font-style: italic;
+    opacity: 0.7;
+    margin-top: 80px;
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 0.85; }
+  }
+
+  .error {
+    color: var(--wine);
+    text-align: center;
+    font-style: italic;
+    margin-top: 60px;
+    padding: 0 20px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--parchment);
+    padding: 0.7rem 1.4rem;
+    border-radius: 2px;
+    font-family: 'IM Fell English SC', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .footer {
+    margin-top: 28px;
+    font-style: italic;
+    opacity: 0.55;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  @media (max-width: 500px) {
+    .card { padding: 30px 22px; }
+    .saint-name { font-size: 1.4rem; }
+    .body-text, .intercession { font-size: 1rem; }
+    .intercession { padding-left: 12px; }
+    .actions { gap: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>The Holy Absurd</h1>
+<p class="subtitle">Give the machine a vibe. It will hand you back a saint. Canonicity not guaranteed.</p>
+
+<div class="input-row">
+  <input id="vibe" type="text" placeholder="a vibe, a feeling, a noun, anything..." maxlength="140" autocomplete="off" autofocus>
+  <button id="go" class="primary">Canonize</button>
+</div>
+
+<div class="options-row">
+  <label>
+    <input type="checkbox" id="illuminated">
+    <span>with illumination</span>
+  </label>
+  <span class="hint">(slower — uses more of your message allowance)</span>
+</div>
+
+<div class="card" id="card">
+  <div class="placeholder">The reliquary awaits an offering.</div>
+</div>
+
+<div id="toast" class="toast">copied</div>
+
+<script>
+  const card = document.getElementById('card');
+  const input = document.getElementById('vibe');
+  const btn = document.getElementById('go');
+  const toastEl = document.getElementById('toast');
+  const illumCheckbox = document.getElementById('illuminated');
+
+  let currentSaint = null;
+
+  btn.addEventListener('click', generate);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') generate(); });
+
+  const BASE_PROMPT = `You are documenting an entry from a hagiographic compendium that has always existed. The user gives you a single word or short phrase — a vibe, ache, joy, or chaos. You return the saint who tends it. This saint already exists. Their canonization is in the past. Your task is documentation, not invention.
+
+Hold both registers at once without announcing which. A funny word produces a saint who is funny in a fully-canonized, straight-faced way. A grief word produces a saint who has been prayed to for centuries by others with the same particular ache. Tone follows the input, not a preset mode. Treat everything with the same straight-faced devotion — that IS the joke and IS the tenderness. The wheeze-laugh has a real saint. Fully. Not ironically.
+
+Specificity is the entire engine. Not "Saint of Awkwardness" but "Saint of the Exact Moment You Realize You've Been Saying Someone's Name Wrong for Six Months." The more granular and particular, the more it lands. The patron saint of overthinking is depicted holding seventeen drafts of the same letter — that level of visual and biographical specificity.
+
+Make the entry feel retroactive. Like the user is finding evidence that someone already knew, already prayed over this exact corner, before they asked. Canonization is in the past. Origin reads documented, not invented. Prayers sound said before, by others, in other centuries, for the same exact thing.`;
+
+  const BASE_KEYS = `- "name": "Saint [Name] of the [specific thing]" or "Blessed [Name] the [epithet]" — Latin/saint-naming register, sometimes obscure but never invented-sounding
+- "domain": one line beginning "Patron saint of..." or "Patroness of..." stated with the precision of liturgical text
+- "iconography": what they hold in paintings, what appears at their feet, sometimes weird and visually specific. 2-3 sentences.
+- "origin": the moment that led to canonization. 2-3 sentences. Past tense. Documentary register. Specific century or era if it serves. Let it ache a little even when funny.
+- "intercession": a real collect, written as it would be prayed aloud. Begin with "Grant us..." or "O Blessed..." or similar liturgical opening. 2-4 sentences. This is the emotional payload — the gift you are actually handing the user.
+- "feast_day": absurd precision — either a real date with reasoning ("February 11th, the day Brigid lost her father's letter"), or a relational date ("the Tuesday after a three-day weekend," "the day after you realize it was already over"). One line.`;
+
+  const ILLUMINATION_KEY = `\n- "illumination": an SVG illustration of this saint in the style of medieval manuscript illumination — see SVG requirements below`;
+
+  const SVG_REQUIREMENTS = `
+
+SVG REQUIREMENTS (very important — read carefully):
+- Start with: <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 320' width='100%' height='100%'>
+- USE SINGLE QUOTES for ALL attributes (so the JSON stays clean). NO double quotes inside the SVG.
+- Palette: ONLY use these colors — #722f37 (wine red), #b8860b (gilt gold), #2a1810 (ink brown), #f4ead5 (parchment background), and optional #8a6a3f (muted tan). No other colors.
+- Fill the viewBox with a parchment rectangle first, then draw on top.
+- Depict THIS saint specifically — pull from the iconography you wrote. Halo (circle behind head) is required. Include at least ONE weird marginalia element relevant to the vibe — a creature, plant, object, tiny person, snail, hand emerging from a cloud, etc.
+- EMBRACE THE WONK. Real medieval marginalia had backwards hands, confused goats in hats, rabbits jousting snails, tiny scribes falling off letters, saints with heads too small for their bodies. Lean INTO that. Proportions should be slightly wrong. Faces should be earnest and strange. This is a feature.
+- Use <path>, <circle>, <rect>, <polygon>, <ellipse>, <line>. You may use <text> sparingly.
+- NO <script>, NO <foreignObject>, NO <image>, NO external references, NO event handlers.
+- Aim for 15-40 elements. Keep it readable but detailed enough to be interesting.`;
+
+  async function generate() {
+    const vibe = input.value.trim();
+    if (!vibe) {
+      card.innerHTML = '<div class="placeholder">Give it a word first.</div>';
+      input.focus();
+      return;
+    }
+
+    const illuminated = illumCheckbox.checked;
+    currentSaint = null;
+
+    btn.disabled = true;
+    const loadingText = illuminated
+      ? 'consulting what was already there, &amp; rousing the illuminators'
+      : 'consulting what was already there';
+    card.innerHTML = `<div class="loading">${loadingText} . . .</div>`;
+
+    const prompt = `${BASE_PROMPT}
+
+Return ONLY a valid JSON object. No markdown fences. No preamble. No commentary. Just the object with these keys:
+
+${BASE_KEYS}${illuminated ? ILLUMINATION_KEY : ''}${illuminated ? SVG_REQUIREMENTS : ''}
+
+The word: "${vibe}"`;
+
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: illuminated ? 3500 : 1500,
+          messages: [{ role: "user", content: prompt }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`api returned ${response.status}`);
+      }
+
+      const data = await response.json();
+      const text = data.content
+        .filter(b => b.type === "text")
+        .map(b => b.text)
+        .join('\n');
+
+      const saint = extractJSON(text);
+
+      // Validate shape
+      const required = ['name', 'domain', 'iconography', 'origin', 'intercession', 'feast_day'];
+      for (const key of required) {
+        if (!saint[key] || typeof saint[key] !== 'string') {
+          throw new Error(`malformed entry: missing ${key}`);
+        }
+      }
+
+      currentSaint = saint;
+      render(saint);
+    } catch (err) {
+      console.error(err);
+      card.innerHTML = `<div class="error">The page is missing from this volume.<br><span style="font-size:0.95rem; opacity:0.75;">Try another word.</span></div>`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function extractJSON(text) {
+    let cleaned = text.trim();
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+    const first = cleaned.indexOf('{');
+    const last = cleaned.lastIndexOf('}');
+    if (first === -1 || last === -1) throw new Error('no json object found in response');
+    return JSON.parse(cleaned.slice(first, last + 1));
+  }
+
+  function render(s) {
+    const svgHtml = s.illumination ? `<div class="saint-image">${sanitizeSvg(s.illumination)}</div>` : '';
+    card.innerHTML = `
+      ${svgHtml}
+      <div class="saint-name">${escape(s.name)}</div>
+      <div class="domain">${escape(s.domain)}</div>
+      <div class="divider">✦ ❦ ✦</div>
+      <div class="label">Iconography</div>
+      <div class="body-text">${escape(s.iconography)}</div>
+      <div class="label">Origin</div>
+      <div class="body-text">${escape(s.origin)}</div>
+      <div class="label">Intercession</div>
+      <div class="intercession">${escape(s.intercession)}</div>
+      <div class="feast">
+        <div>Feast Day</div>
+        <div class="feast-date">${escape(s.feast_day)}</div>
+      </div>
+      <div class="actions" id="actions">
+        <button id="copy-btn">copy</button>
+        <button id="another-btn">another</button>
+      </div>
+    `;
+
+    requestAnimationFrame(() => {
+      document.getElementById('actions').classList.add('visible');
+    });
+
+    document.getElementById('copy-btn').addEventListener('click', copyEntry);
+    document.getElementById('another-btn').addEventListener('click', another);
+  }
+
+  function formatForCopy(s) {
+    return [
+      `I found your patron saint.`,
+      ``,
+      s.name,
+      s.domain,
+      ``,
+      `✦ ❦ ✦`,
+      ``,
+      s.iconography,
+      ``,
+      s.origin,
+      ``,
+      `— ${s.intercession}`,
+      ``,
+      `Feast Day: ${s.feast_day}`,
+      ``,
+      `✦`,
+      `The Holy Absurd`
+    ].join('\n');
+  }
+
+  async function copyEntry() {
+    if (!currentSaint) return;
+    const text = formatForCopy(currentSaint);
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('copied');
+    } catch (err) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('copied');
+      } catch (e) {
+        showToast('could not copy');
+      }
+      document.body.removeChild(ta);
+    }
+  }
+
+  function another() {
+    input.value = '';
+    input.focus();
+    card.innerHTML = '<div class="placeholder">The reliquary awaits an offering.</div>';
+    currentSaint = null;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showToast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add('visible');
+    setTimeout(() => toastEl.classList.remove('visible'), 1800);
+  }
+
+  function sanitizeSvg(svg) {
+    if (!svg || typeof svg !== 'string') return '';
+    return svg
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '')
+      .replace(/\s+on\w+\s*=\s*"[^"]*"/gi, '')
+      .replace(/\s+on\w+\s*=\s*'[^']*'/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/<image\b[^>]*>/gi, '');
+  }
+
+  function escape(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+</script>
+
+</body>
+</html>
